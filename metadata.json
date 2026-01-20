@@ -1,0 +1,8 @@
+{
+  "name": "SyncPro",
+  "description": "A premium all-in-one productivity suite for Mac and iPhone styles, featuring AI-powered link categorization, calendar, note-taking, journaling, and project management.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

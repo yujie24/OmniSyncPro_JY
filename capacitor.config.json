@@ -1,0 +1,13 @@
+
+{
+  "appId": "com.omnisync.pro",
+  "appName": "OmniSync Pro",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "ios": {
+    "contentInset": "always"
+  }
+}
