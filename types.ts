@@ -5,6 +5,9 @@ export interface AppSettings {
   backgroundImage: string | null;
   blurAmount: number;
   theme: 'light' | 'dark' | 'auto';
+  githubToken?: string;
+  gistId?: string;
+  autoSync: boolean;
 }
 
 export interface User {

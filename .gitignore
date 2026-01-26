@@ -1,0 +1,31 @@
+# Node
+node_modules/
+dist/
+build/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Env
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# iOS / Xcode
+*.xcworkspace
+DerivedData/
+*.xcuserstate
+
+# Android
+.gradle/
+
+# Misc
+npm-debug.log
+yarn-error.log
+*.swp

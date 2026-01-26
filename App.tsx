@@ -8,7 +8,8 @@ import NotesView from './components/NotesView';
 import ProjectBoard from './components/ProjectBoard';
 import LinkHub from './components/LinkHub';
 import SettingsView from './components/SettingsView';
-import { Menu, X, Cloud } from 'lucide-react';
+import JournalView from './components/JournalView';
+import { Menu, X, Cloud, RefreshCw, AlertCircle } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>('Calendar');
@@ -17,7 +18,6 @@ const App: React.FC = () => {
   const store = useAppStore();
 
   useEffect(() => {
-    // Check if running as a PWA (standalone mode)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
     setIsPWA(!!isStandalone);
   }, []);
@@ -34,18 +34,10 @@ const App: React.FC = () => {
         return <ProjectBoard tasks={store.tasks} onAddTask={store.addTask} onUpdateTask={store.updateTask} />;
       case 'Links':
         return <LinkHub links={store.links} onAdd={store.addLink} />;
+      case 'Journal':
+        return <JournalView entries={store.journal} onAdd={store.addJournal} />;
       case 'Settings':
         return <SettingsView />;
-      case 'Journal':
-        return (
-          <div className="p-20 text-center">
-            <h1 className="text-4xl font-bold mb-4">Journal</h1>
-            <p className="text-gray-500 italic">"Write down your thoughts, preserve the moments..."</p>
-            <div className="mt-10 max-w-2xl mx-auto p-10 bg-white/60 backdrop-blur-md rounded-3xl shadow-xl">
-               <p className="text-gray-600">Journal feature coming in next iteration with full rich text support.</p>
-            </div>
-          </div>
-        );
       default:
         return <div>View not found</div>;
     }
@@ -61,27 +53,37 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Content Wrapper with Glass Overlay */}
-      <div className={`relative z-10 flex w-full h-full transition-all duration-500 ${hasBackground ? 'bg-white/10' : ''}`} style={{ backdropFilter: hasBackground ? `blur(${store.user.settings.blurAmount}px)` : 'none' }}>
-        {/* Sidebar - Desktop */}
-        <Sidebar 
-          currentView={currentView} 
-          setView={setCurrentView} 
-          user={store.user} 
-        />
+      {/* Sync Status Overlay (Small HUD) */}
+      <div className="absolute top-4 right-4 z-50 pointer-events-none">
+        {store.syncStatus !== 'idle' && (
+          <div className="glass px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm animate-in fade-in slide-in-from-right-4">
+            {store.syncStatus === 'syncing' ? (
+              <RefreshCw className="h-3 w-3 text-blue-500 animate-spin" />
+            ) : store.syncStatus === 'success' ? (
+              <Cloud className="h-3 w-3 text-green-500" />
+            ) : (
+              <AlertCircle className="h-3 w-3 text-red-500" />
+            )}
+            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-600">
+              {store.syncStatus === 'syncing' ? 'Syncing...' : store.syncStatus === 'success' ? 'Cloud Updated' : 'Sync Error'}
+            </span>
+          </div>
+        )}
+      </div>
 
-        {/* Mobile Nav Header */}
+      <div className={`relative z-10 flex w-full h-full transition-all duration-500 ${hasBackground ? 'bg-white/10' : ''}`} style={{ backdropFilter: hasBackground ? `blur(${store.user.settings.blurAmount}px)` : 'none' }}>
+        <Sidebar currentView={currentView} setView={setCurrentView} user={store.user} />
+
         <div className={`md:hidden fixed top-0 left-0 right-0 h-16 glass flex items-center justify-between px-6 z-50 ${isPWA ? 'pt-8 h-20' : ''}`}>
           <div className="flex items-center gap-2">
             <Cloud className="h-5 w-5 text-blue-500" />
             <span className="font-bold text-lg">{currentView}</span>
           </div>
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X /> : <Menu />}
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
-        {/* Mobile Menu Overlay */}
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-40 bg-white/95 backdrop-blur-2xl md:hidden pt-24 overflow-y-auto">
             <div className="flex flex-col gap-6 p-10">
@@ -94,20 +96,10 @@ const App: React.FC = () => {
                   {v}
                 </button>
               ))}
-              <div className="mt-10 pt-10 border-t border-gray-100">
-                <div className="flex items-center gap-4">
-                    <img src={store.user.avatar} className="w-12 h-12 rounded-full border border-gray-200" alt="avatar" />
-                    <div>
-                      <p className="font-bold">{store.user.name}</p>
-                      <p className="text-sm text-gray-500">{store.user.email}</p>
-                    </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
 
-        {/* Main Content Area */}
         <main className={`flex-1 h-full overflow-hidden transition-all ${isPWA ? 'pt-20' : 'pt-16'} md:pt-0 ${hasBackground ? 'bg-transparent' : ''}`}>
           <div className="h-full w-full max-w-[1400px] mx-auto">
             {renderView()}

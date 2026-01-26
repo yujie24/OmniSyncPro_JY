@@ -9,7 +9,7 @@ interface CalendarViewProps {
   onAddEvent: (event: CalendarEvent) => void;
 }
 
-const CalendarView: React.FC<CalendarViewProps> = ({ events }) => {
+const CalendarView: React.FC<CalendarViewProps> = ({ events, onAddEvent }) => {
   const [viewDate, setViewDate] = useState(new Date());
 
   const months = [
@@ -65,6 +65,28 @@ const CalendarView: React.FC<CalendarViewProps> = ({ events }) => {
     return days;
   }, [viewDate]);
 
+  const handleAddNewEvent = (preselectedDate?: string) => {
+    const title = prompt('Event Title:');
+    if (!title) return;
+
+    const date = prompt('Date (YYYY-MM-DD):', preselectedDate || new Date().toISOString().split('T')[0]);
+    if (!date) return;
+
+    const typeOptions = ['work', 'personal', 'important'];
+    const typeInput = prompt('Type (work, personal, important):', 'personal');
+    const type = typeOptions.includes(typeInput || '') ? (typeInput as any) : 'personal';
+
+    const newEvent: CalendarEvent = {
+      id: Date.now().toString(),
+      title,
+      date,
+      type,
+      description: ''
+    };
+
+    onAddEvent(newEvent);
+  };
+
   const getWeekNumber = (d: Date) => {
     const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     const dayNum = date.getUTCDay() || 7;
@@ -93,8 +115,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ events }) => {
       '2024-10-1': { label: '国庆节', isHoliday: true },
       '2024-10-2': { label: '国庆节', isHoliday: true },
       '2024-10-3': { label: '国庆节', isHoliday: true },
-      '2024-2-4': { label: '班', isHoliday: false },
-      '2024-2-18': { label: '班', isHoliday: false },
       '2025-1-1': { label: '元旦', isHoliday: true },
       '2025-1-29': { label: '春节', isHoliday: true },
     };
@@ -151,7 +171,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ events }) => {
             <MapPin className="h-3.5 w-3.5 text-blue-500" />
             <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">China Region (CN)</span>
           </div>
-          <button className="bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-blue-700 transition-all font-semibold shadow-lg shadow-blue-200 active:scale-95">
+          <button 
+            onClick={() => handleAddNewEvent()}
+            className="bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-blue-700 transition-all font-semibold shadow-lg shadow-blue-200 active:scale-95"
+          >
             <Plus className="h-4 w-4" /> New Event
           </button>
         </div>
@@ -190,7 +213,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ events }) => {
           return (
             <React.Fragment key={idx}>
               {weekNumDisplay}
-              <div className={`bg-white p-2 min-h-[100px] flex flex-col group transition-all ${!item.isCurrentMonth ? 'opacity-40' : ''} hover:bg-blue-50/30 cursor-pointer relative`}>
+              <div 
+                onClick={() => handleAddNewEvent(dateStr)}
+                className={`bg-white p-2 min-h-[100px] flex flex-col group transition-all ${!item.isCurrentMonth ? 'opacity-40' : ''} hover:bg-blue-50/30 cursor-pointer relative`}
+              >
                 
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex flex-col">
